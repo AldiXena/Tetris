@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
-const fullMessage = "Hey, happy birthday! I hope you have a day that's as amazing as you are. Remember all the good times we've had? From late-night talks to silly adventures, every moment with you is special. This little retro gift is just a small way to say how much you mean to me. I've packed it with some of our memories and favorite things. I can't wait to make many more memories with you. Cheers to another year of being awesome. I love you! <3";
+const fullMessage = "Hei, selamat ulang tahun! 🎉 Semoga harimu penuh dengan hal-hal indah, sama seperti dirimu. Aku masih inget semua momen lucu dan gila yang pernah kita lewati bareng dari ngobrol sampai larut malam, ketawa nggak jelas, sampai petualangan kecil yang kadang absurd tapi selalu bikin bahagia. Hadiah kecil ini mungkin sederhana, tapi aku bikin dengan banyak kenangan dan hal-hal yang kita suka. Buatku, setiap waktu bersamamu itu berharga banget, dan aku nggak sabar nambahin lebih banyak cerita seru lagi sama kamu. Jadi, cheers untuk tahun baru dalam hidupmu! Semoga makin banyak tawa, cinta, dan hal-hal indah yang kita jalani bareng. Aku sayang kamu ❤️";
 
 export default function MessagePage() {
   const [displayedMessage, setDisplayedMessage] = useState('');
