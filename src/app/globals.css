@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%; /* Deep Black */
+    --foreground: 111 100% 54%; /* Neon Green */
+    --card: 0 0% 4%;
+    --card-foreground: 111 100% 54%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 111 100% 54%;
+    --primary: 111 100% 54%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 285 100% 53%; /* Vibrant Purple for secondary actions */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 285 100% 53%; /* Vibrant Purple */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 111 100% 54%; /* Neon Green border */
+    --input: 0 0% 10%;
+    --ring: 111 100% 54%;
+    --radius: 0.25rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Add custom styles for the gameboy look */
+.dot-matrix-screen {
+  background: #081820;
+  background-image:
+    linear-gradient(rgba(57, 255, 20, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 20, 0.1) 1px, transparent 1px);
+  background-size: 2px 2px;
+  image-rendering: pixelated;
+  height: 20rem; /* h-80 */
+}
+
+.game-console-container[data-page="music"] .dot-matrix-screen {
+    height: 32rem; /* h-[32rem] */
+}
+
+.game-console-container[data-page="music"] .screen-wrapper {
+    margin-bottom: 0;
+}
+
+.game-console-container[data-page="music"] .controls-wrapper {
+    display: none;
+}

@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "gallery-1",
+      "description": "A happy couple smiling",
+      "imageUrl": "/images/gallery-1.jpg",
+      "imageHint": "couple smiling"
+    },
+    {
+      "id": "gallery-2",
+      "description": "Two people holding hands",
+      "imageUrl": "/images/gallery-2.jpg",
+      "imageHint": "holding hands"
+    },
+    {
+      "id": "gallery-3",
+      "description": "A scenic view from a trip",
+      "imageUrl": "/images/gallery-3.jpg",
+      "imageHint": "scenic view"
+    },
+    {
+      "id": "gallery-4",
+      "description": "Silly faces selfie",
+      "imageUrl": "/images/gallery-4.jpg",
+      "imageHint": "silly selfie"
+    },
+    {
+      "id": "album-art",
+      "description": "Album art for Boyz II Men",
+      "imageUrl": "/images/album-art.jpg",
+      "imageHint": "90s album"
+    }
+  ]
+}
