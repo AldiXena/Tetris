@@ -4,7 +4,7 @@ import { GameConsole } from '@/components/game-console';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'HBD SAYANGKU',
+  title: 'HBD SAYANGKU ❤️',
   description: 'A special birthday gift',
 };
 
