@@ -32,11 +32,11 @@ export function LoadingScreen() {
   return (
     <div className="w-full h-full flex flex-col items-center justify-center text-center">
       <div className="flex-grow flex flex-col items-center justify-center gap-4 animate-pulse">
-        <h2 className="text-3xl font-bold">HEYTML-BOY</h2>
+        <h2 className="text-3xl font-bold">FROM-UR-BOY</h2>
         <Progress value={progress} className="w-4/5 h-6 bg-gray-700 border-2 border-primary" />
         <p className="text-lg mt-2">{message}</p>
       </div>
-      <p className="text-xs text-muted-foreground self-end">© 2024 HEYTML-BOY Inc.</p>
+      <p className="text-xs text-muted-foreground self-end">© 2025 FROM-UR-BOY Inc.</p>
     </div>
   );
 }

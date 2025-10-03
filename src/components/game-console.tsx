@@ -58,7 +58,7 @@ export function GameConsole({ children }: { children: ReactNode }) {
 
       <div className="controls-wrapper">
         <div className="text-center mb-4">
-          <h1 className="text-3xl font-bold text-blue-400 tracking-wider" style={{ textShadow: '2px 2px #000' }}>HEYTML-BOY</h1>
+          <h1 className="text-3xl font-bold text-blue-400 tracking-wider" style={{ textShadow: '2px 2px #000' }}>FROM-UR-BOY</h1>
         </div>
         
         <div className="grid grid-cols-2 items-center gap-4 h-28">
