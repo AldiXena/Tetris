@@ -1,57 +1,16 @@
 'use client';
 
-import { useState, useEffect, type ReactNode, useRef } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Power, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { MusicPlayer } from '@/components/MusicPlayer';
 
 const dispatchGameInput = (action: string) => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('game-input', { detail: { action } }));
   }
 };
-
-type Track = {
-  title: string;
-  artist: string;
-  url: string;
-};
-
-function MusicPlayerControls({ onPlayPause, onNext, onPrev, isPlaying, playlistEmpty }: { onPlayPause: () => void, onNext: () => void, onPrev: () => void, isPlaying: boolean, playlistEmpty: boolean }) {
-  return (
-    <div className="flex justify-center items-center gap-6">
-      <Button variant="ghost" size="icon" onMouseDown={onPrev} disabled={playlistEmpty}><SkipBack className="w-8 h-8" /></Button>
-      <Button variant="ghost" size="icon" onMouseDown={onPlayPause} disabled={playlistEmpty}>
-        {isPlaying ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10" />}
-      </Button>
-      <Button variant="ghost" size="icon" onMouseDown={onNext} disabled={playlistEmpty}><SkipForward className="w-8 h-8" /></Button>
-    </div>
-  );
-}
-
-function MusicPlaylist({ playlist, currentTrackIndex, onTrackSelect }: { playlist: Track[], currentTrackIndex: number, onTrackSelect: (index: number) => void }) {
-  return (
-    <div className="h-full overflow-y-auto py-1 text-left">
-      {playlist.length > 0 ? playlist.map((track, index) => (
-        <button
-          key={index}
-          onClick={() => onTrackSelect(index)}
-          className={`w-full text-left p-1 rounded-sm text-sm ${index === currentTrackIndex ? 'bg-primary/20' : 'hover:bg-primary/10'}`}
-        >
-          <span className="font-bold">{index + 1}.</span> {track.title}
-        </button>
-      )) : (
-        <div className="text-center text-primary/70 pt-8">
-            <p>No music found.</p>
-            <p className='text-xs'>Add MP3 files to /public/music</p>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export function GameConsole({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -65,15 +24,6 @@ export function GameConsole({ children }: { children: ReactNode }) {
   const isTetrisPage = pathname === '/tetris';
   const isHomePage = pathname === '/';
 
-  // Music Player State
-  const [playlist, setPlaylist] = useState<Track[]>([]);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [isFetchingMusic, setIsFetchingMusic] = useState(true);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-
   const dPadUpAction = isTetrisPage ? 'hardDrop' : 'noop';
   const dPadDownAction = isTetrisPage ? 'drop' : 'noop';
   const dPadLeftAction = isTetrisPage ? 'moveLeft' : 'noop';
@@ -81,164 +31,9 @@ export function GameConsole({ children }: { children: ReactNode }) {
   const aButtonAction = isTetrisPage ? 'rotate' : 'noop';
   const bButtonAction = isTetrisPage ? 'rotate' : 'noop';
 
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-
-  useEffect(() => {
-    const fetchPlaylist = async () => {
-      setIsFetchingMusic(true);
-      try {
-        const response = await fetch('/api/music');
-        const data = await response.json();
-        if (data.length > 0) {
-          setPlaylist(data);
-        }
-      } catch (error) {
-        console.error("Failed to fetch playlist:", error);
-        setPlaylist([]);
-      }
-      setIsFetchingMusic(false);
-    };
-
-    if (isMusicPage) {
-        fetchPlaylist();
-    }
-  }, [isMusicPage]);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-      }
-    }
-    const handleAudioEnded = () => handleNextTrack();
-    const handleTimeUpdate = () => {
-        if (audioRef.current) {
-            setCurrentTime(audioRef.current.currentTime);
-        }
-    };
-    const handleLoadedMetadata = () => {
-        if (audioRef.current) {
-            setDuration(audioRef.current.duration);
-        }
-    };
-
-    const currentAudioRef = audioRef.current;
-    currentAudioRef?.addEventListener('ended', handleAudioEnded);
-    currentAudioRef?.addEventListener('timeupdate', handleTimeUpdate);
-    currentAudioRef?.addEventListener('loadedmetadata', handleLoadedMetadata);
-
-    return () => {
-      currentAudioRef?.removeEventListener('ended', handleAudioEnded);
-      currentAudioRef?.removeEventListener('timeupdate', handleTimeUpdate);
-      currentAudioRef?.removeEventListener('loadedmetadata', handleLoadedMetadata);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const currentAudio = audioRef.current;
-    if (currentAudio) {
-      if (isPlaying && playlist.length > 0) {
-        currentAudio.play().catch(e => console.error("Audio play failed:", e));
-      } else {
-        currentAudio.pause();
-      }
-    }
-  }, [isPlaying, playlist.length]);
-
-  useEffect(() => {
-    const currentAudio = audioRef.current;
-    if (currentAudio && playlist.length > 0) {
-      const currentTrack = playlist[currentTrackIndex];
-       if (currentTrack && currentAudio.src !== new URL(currentTrack.url, window.location.origin).href) {
-        currentAudio.src = currentTrack.url;
-        if (isPlaying) {
-            currentAudio.play().catch(e => console.error("Audio play failed on new track:", e));
-        }
-      }
-    } else if (currentAudio && playlist.length === 0) {
-        currentAudio.pause();
-        currentAudio.src = '';
-    }
-  }, [currentTrackIndex, playlist, isPlaying]);
-
-  const handlePlayPause = () => {
-    if (playlist.length > 0) {
-      setIsPlaying(!isPlaying);
-    }
-  };
-
-  const handleNextTrack = () => {
-    if (playlist.length > 0) {
-      setCurrentTrackIndex((prevIndex) => (prevIndex + 1) % playlist.length);
-      setIsPlaying(true);
-    }
-  };
-
-  const handlePrevTrack = () => {
-     if (playlist.length > 0) {
-      setCurrentTrackIndex((prevIndex) => (prevIndex - 1 + playlist.length) % playlist.length);
-      setIsPlaying(true);
-    }
-  };
-
-  const handleTrackSelect = (index: number) => {
-    setCurrentTrackIndex(index);
-    setIsPlaying(true);
-  }
-  
-  const currentTrack = playlist[currentTrackIndex] || { title: "No music loaded", artist: "" };
-
-  const MusicPageContent = () => (
-    <div className="flex flex-col h-full text-center">
-      <h2 className="text-2xl font-bold border-b-2 pb-2 mb-1 p-1">MUSIC PLAYER</h2>
-      <div className="flex-grow flex flex-col justify-between p-1">
-        <div className="flex-grow h-32 overflow-y-auto">
-          {isFetchingMusic ? (
-             <Loader2 className="w-8 h-8 animate-spin mx-auto my-12" />
-          ) : (
-            <MusicPlaylist playlist={playlist} currentTrackIndex={currentTrackIndex} onTrackSelect={handleTrackSelect} />
-          )}
-        </div>
-        <div className='flex flex-col gap-2 mt-2'>
-            <div className='min-h-[40px]'>
-                <p className="text-base font-bold truncate">{currentTrack.title}</p>
-                <p className="text-xs text-primary/80">{currentTrack.artist}</p>
-            </div>
-            <div className="w-full">
-                <Progress value={(currentTime / duration) * 100 || 0} className="h-2 bg-gray-700" />
-                <div className="flex justify-between text-xs mt-1">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                </div>
-            </div>
-            <MusicPlayerControls
-                onPlayPause={handlePlayPause}
-                onNext={handleNextTrack}
-                onPrev={handlePrevTrack}
-                isPlaying={isPlaying}
-                playlistEmpty={playlist.length === 0}
-            />
-        </div>
-      </div>
-      <div className="flex justify-between items-center mt-2 px-1">
-        <Link href="/gallery">
-          <Button variant="destructive" className="bg-btn-red text-black">BACK</Button>
-        </Link>
-        <Link href="/tetris">
-          <Button className="bg-btn-blue text-black">SELANJUTNYA</Button>
-        </Link>
-      </div>
-    </div>
-  );
-  
   const MainScreenContent = () => {
     if (isMusicPage) {
-      return <MusicPageContent />;
+      return <MusicPlayer />;
     }
     return children;
   };

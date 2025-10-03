@@ -25,6 +25,18 @@
       "imageHint": "silly selfie"
     },
     {
+      "id": "gallery-5",
+      "description": "A scenic view from a trip",
+      "imageUrl": "/images/gallery-5.jpg",
+      "imageHint": "scenic view"
+    },
+    {
+      "id": "gallery-6",
+      "description": "Silly faces selfie",
+      "imageUrl": "/images/gallery-6.jpg",
+      "imageHint": "silly selfie"
+    },
+    {
       "id": "album-art",
       "description": "Album art for Boyz II Men",
       "imageUrl": "/images/album-art.jpg",
