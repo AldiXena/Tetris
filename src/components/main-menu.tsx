@@ -14,7 +14,7 @@ export function MainMenu() {
         <p className="text-2xl mb-4 p-2 border-2 border-dashed border-primary/50">
           Happy Birthday!
           <br />
-          Press A Button
+          Tekan Start
         </p>
         <div className="grid grid-cols-2 gap-4">
           {menuItems.map((item) => (
