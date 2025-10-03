@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Link from 'next/link';
 import { PlayCircle } from 'lucide-react';
+import { FullScreenImageViewer } from '@/components/ui/full-screen-image-viewer';
 
 const galleryImages = PlaceHolderImages.filter(img => img.id.startsWith('gallery-'));
 
@@ -14,6 +15,30 @@ export default function GalleryPage() {
   const [isPrinting, setIsPrinting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [printed, setPrinted] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (video) {
+      if (video.paused) {
+        video.play();
+        setIsVideoPlaying(true);
+        const requestFullscreen = 
+          (video as any).requestFullscreen ||
+          (video as any).mozRequestFullScreen || // Firefox
+          (video as any).webkitRequestFullscreen || // Chrome, Safari and Opera
+          (video as any).msRequestFullscreen; // IE/Edge
+        if (requestFullscreen) {
+          requestFullscreen.call(video);
+        }
+      } else {
+        video.pause();
+        setIsVideoPlaying(false);
+      }
+    }
+  };
 
   const startPrinting = () => {
     setIsPrinting(true);
@@ -35,6 +60,9 @@ export default function GalleryPage() {
 
   return (
     <div className="w-full h-full flex flex-col text-center">
+      {selectedImage && (
+        <FullScreenImageViewer imageUrl={selectedImage} onClose={() => setSelectedImage(null)} />
+      )}
       <h2 className="text-2xl font-bold mb-4 border-b-2 pb-2">PHOTOBOOTH</h2>
       
       {!isPrinting && !printed && (
@@ -56,14 +84,14 @@ export default function GalleryPage() {
         <div className="flex-grow overflow-y-auto space-y-4">
           <div className="grid grid-cols-2 gap-4 p-1">
             {galleryImages.map((image, index) => (
-              <div key={image.id} className="bg-gray-100 p-1 pb-4 rounded-sm shadow-md relative">
+              <div key={image.id} className="bg-gray-100 p-1 pb-4 rounded-sm shadow-md relative overflow-hidden cursor-pointer" onClick={() => setSelectedImage(image.imageUrl)}>
                 <Image
                   src={image.imageUrl}
                   alt={image.description}
                   width={200}
                   height={200}
                   data-ai-hint={image.imageHint}
-                  className="w-full h-auto aspect-square object-cover"
+                  className="w-full h-auto aspect-square object-cover transition-transform duration-300 ease-in-out hover:scale-110"
                 />
                 <p className="absolute bottom-1 left-2 text-black font-bold text-xs">#{index + 1} // {new Date().getFullYear()}</p>
               </div>
@@ -72,11 +100,22 @@ export default function GalleryPage() {
 
           <div className="p-1">
             <p className="text-lg font-bold my-2">CLIP DUMP</p>
-            <div className="bg-gray-800 p-1 rounded-sm shadow-md">
-                <video controls className="w-full h-auto rounded-sm">
-                  <source src="/videos/memories.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
+            <div className="bg-gray-800 p-1 rounded-sm shadow-md relative">
+              <video
+                ref={videoRef}
+                className="w-full h-auto rounded-sm"
+                onClick={togglePlay}
+                onPlay={() => setIsVideoPlaying(true)}
+                onPause={() => setIsVideoPlaying(false)}
+              >
+                <source src="/videos/memories.mp4" type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+              {!isVideoPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50" onClick={togglePlay}>
+                  <PlayCircle className="w-16 h-16 text-white" />
+                </div>
+              )}
             </div>
           </div>
         </div>

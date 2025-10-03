@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Power, ArrowUp, ArrowDown, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 const dispatchGameInput = (action: string) => {
   if (typeof window !== 'undefined') {
@@ -22,11 +23,11 @@ type Track = {
 function MusicPlayerControls({ onPlayPause, onNext, onPrev, isPlaying, playlistEmpty }: { onPlayPause: () => void, onNext: () => void, onPrev: () => void, isPlaying: boolean, playlistEmpty: boolean }) {
   return (
     <div className="flex justify-center items-center gap-6">
-      <Button variant="ghost" size="icon" onClick={onPrev} disabled={playlistEmpty}><SkipBack className="w-8 h-8" /></Button>
-      <Button variant="ghost" size="icon" onClick={onPlayPause} disabled={playlistEmpty}>
+      <Button variant="ghost" size="icon" onMouseDown={onPrev} disabled={playlistEmpty}><SkipBack className="w-8 h-8" /></Button>
+      <Button variant="ghost" size="icon" onMouseDown={onPlayPause} disabled={playlistEmpty}>
         {isPlaying ? <Pause className="w-10 h-10" /> : <Play className="w-10 h-10" />}
       </Button>
-      <Button variant="ghost" size="icon" onClick={onNext} disabled={playlistEmpty}><SkipForward className="w-8 h-8" /></Button>
+      <Button variant="ghost" size="icon" onMouseDown={onNext} disabled={playlistEmpty}><SkipForward className="w-8 h-8" /></Button>
     </div>
   );
 }
@@ -70,6 +71,8 @@ export function GameConsole({ children }: { children: ReactNode }) {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [isFetchingMusic, setIsFetchingMusic] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
 
   const dPadUpAction = isTetrisPage ? 'hardDrop' : 'noop';
   const dPadDownAction = isTetrisPage ? 'drop' : 'noop';
@@ -77,6 +80,12 @@ export function GameConsole({ children }: { children: ReactNode }) {
   const dPadRightAction = isTetrisPage ? 'moveRight' : 'noop';
   const aButtonAction = isTetrisPage ? 'rotate' : 'noop';
   const bButtonAction = isTetrisPage ? 'rotate' : 'noop';
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+  };
 
   useEffect(() => {
     const fetchPlaylist = async () => {
@@ -105,13 +114,27 @@ export function GameConsole({ children }: { children: ReactNode }) {
         audioRef.current = new Audio();
       }
     }
-     const handleAudioEnded = () => handleNextTrack();
-    
+    const handleAudioEnded = () => handleNextTrack();
+    const handleTimeUpdate = () => {
+        if (audioRef.current) {
+            setCurrentTime(audioRef.current.currentTime);
+        }
+    };
+    const handleLoadedMetadata = () => {
+        if (audioRef.current) {
+            setDuration(audioRef.current.duration);
+        }
+    };
+
     const currentAudioRef = audioRef.current;
     currentAudioRef?.addEventListener('ended', handleAudioEnded);
+    currentAudioRef?.addEventListener('timeupdate', handleTimeUpdate);
+    currentAudioRef?.addEventListener('loadedmetadata', handleLoadedMetadata);
 
     return () => {
       currentAudioRef?.removeEventListener('ended', handleAudioEnded);
+      currentAudioRef?.removeEventListener('timeupdate', handleTimeUpdate);
+      currentAudioRef?.removeEventListener('loadedmetadata', handleLoadedMetadata);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -185,6 +208,13 @@ export function GameConsole({ children }: { children: ReactNode }) {
             <div className='min-h-[40px]'>
                 <p className="text-base font-bold truncate">{currentTrack.title}</p>
                 <p className="text-xs text-primary/80">{currentTrack.artist}</p>
+            </div>
+            <div className="w-full">
+                <Progress value={(currentTime / duration) * 100 || 0} className="h-2 bg-gray-700" />
+                <div className="flex justify-between text-xs mt-1">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                </div>
             </div>
             <MusicPlayerControls
                 onPlayPause={handlePlayPause}
